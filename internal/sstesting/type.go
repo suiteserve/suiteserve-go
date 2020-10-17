@@ -1,4 +1,4 @@
-package suiteservego
+package sstesting
 
 import "time"
 
