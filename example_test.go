@@ -1,6 +1,7 @@
 package go_runner
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -8,6 +9,7 @@ import (
 func TestExample1(t *testing.T) {
 	t.Parallel()
 	time.Sleep(3 * time.Second)
+	fmt.Println("EXAMPLE 1")
 }
 
 func TestExample2(t *testing.T) {

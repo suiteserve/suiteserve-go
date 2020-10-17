@@ -16,15 +16,17 @@ const contentType = "application/json"
 type Client struct {
 	http.Client
 
-	id       string
-	casesIdx int64
-	url      string
+	id    string
+	cases map[string]string
+	idx   int64
+	url   string
 }
 
 func Open(url, name string, tags []string) (*Client, error) {
 	c := &Client{
 		Client: http.Client{},
 		url:    url,
+		cases:  make(map[string]string),
 	}
 	if err := c.startSuite(name, tags); err != nil {
 		return nil, err
@@ -33,10 +35,18 @@ func Open(url, name string, tags []string) (*Client, error) {
 }
 
 func (c *Client) OnEvent(e *sstesting.TestEvent) error {
-	if e.Action == sstesting.TestEventActionRun {
-		return c.startCase(e.Package + "/" + e.Test)
+	if e.Test == "" {
+		return nil
 	}
-	return nil
+	cname := e.Package + "/" + e.Test
+	switch e.Action {
+	case sstesting.TestEventActionRun:
+		return c.startCase(cname)
+	case sstesting.TestEventActionOutput:
+		return c.addLogLine(cname, e.Output)
+	default:
+		return nil
+	}
 }
 
 func (c *Client) Close() error {
@@ -64,7 +74,7 @@ func (c *Client) startCase(name string) (err error) {
 	resp, err := c.Post(url, contentType, mustMarshalJSON(map[string]interface{}{
 		"suite_id":   c.id,
 		"name":       name,
-		"idx":        atomic.AddInt64(&c.casesIdx, 1),
+		"idx":        atomic.AddInt64(&c.idx, 1),
 		"status":     "started",
 		"created_at": now,
 		"started_at": now,
@@ -74,8 +84,26 @@ func (c *Client) startCase(name string) (err error) {
 	}
 	defer drainAndClose(resp.Body, &err)
 	var id string
-	// TODO
-	return json.NewDecoder(resp.Body).Decode(&id)
+	if err := json.NewDecoder(resp.Body).Decode(&id); err != nil {
+		return err
+	}
+	c.cases[name] = id
+	return nil
+}
+
+func (c *Client) addLogLine(cname, line string) (err error) {
+	cid := c.cases[cname]
+	url := c.url + "/v1/logs"
+	resp, err := c.Post(url, contentType, mustMarshalJSON(map[string]interface{}{
+		"case_id": cid,
+		"idx":     atomic.AddInt64(&c.idx, 1),
+		"line":    line,
+	}))
+	if err != nil {
+		return err
+	}
+	drainAndClose(resp.Body, &err)
+	return nil
 }
 
 func mustMarshalJSON(v interface{}) io.Reader {
