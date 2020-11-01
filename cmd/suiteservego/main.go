@@ -38,7 +38,7 @@ func main() {
 		if err != nil {
 			return err
 		}
-		defer close(c, &err)
+		defer safeClose(c, &err)
 
 		dec := json.NewDecoder(os.Stdin)
 		for {
@@ -63,7 +63,7 @@ func main() {
 	}
 }
 
-func close(c io.Closer, err *error) {
+func safeClose(c io.Closer, err *error) {
 	if cerr := c.Close(); cerr != nil && *err == nil {
 		*err = cerr
 	}
