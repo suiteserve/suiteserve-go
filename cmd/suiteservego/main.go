@@ -34,10 +34,7 @@ func main() {
 	}
 
 	err := func() (err error) {
-		c, err := client.Open(url, *nameFlag, strings.Split(*tagsFlag, ","))
-		if err != nil {
-			return err
-		}
+		c := client.Open(url, *nameFlag, strings.Split(*tagsFlag, ","))
 		defer safeClose(c, &err)
 
 		dec := json.NewDecoder(os.Stdin)
@@ -52,6 +49,7 @@ func main() {
 			if *reprintFlag {
 				fmt.Print(e.Output)
 			}
+
 			if err := c.OnEvent(&e); err != nil {
 				return err
 			}

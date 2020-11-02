@@ -6,12 +6,15 @@ import (
 )
 
 type Client struct {
-	baseUrl string
 	http.Client
 
+	init bool
+	closed bool
+	baseUrl string
+	name string
+	tags []string
 	id    string
 	cases map[string]string
-
 	idx int64
 }
 
@@ -20,18 +23,25 @@ func (c *Client) incIdx() int64 {
 	return c.idx
 }
 
-func Open(url, name string, tags []string) (*Client, error) {
-	c := &Client{
+func Open(url, name string, tags []string) *Client {
+	return &Client{
 		baseUrl: url,
+		name: name,
+		tags: tags,
 		cases:   make(map[string]string),
 	}
-	if err := c.startSuite(name, tags); err != nil {
-		return nil, err
-	}
-	return c, nil
 }
 
 func (c *Client) OnEvent(e *sstesting.TestEvent) error {
+	if c.closed {
+		panic("client closed")
+	}
+	if !c.init {
+		if err := c.startSuite(c.name, c.tags); err != nil {
+			return err
+		}
+		c.init = true
+	}
 	if e.Test == "" {
 		return nil
 	}
@@ -45,11 +55,17 @@ func (c *Client) OnEvent(e *sstesting.TestEvent) error {
 		return c.finishCase(caseName, CaseResultPassed)
 	case sstesting.TestEventActionFail:
 		return c.finishCase(caseName, CaseResultFailed)
+	case sstesting.TestEventActionSkip:
+		return c.finishCase(caseName, CaseResultSkipped)
 	default:
 		return nil
 	}
 }
 
 func (c *Client) Close() error {
+	if !c.init {
+		return nil
+	}
+	c.closed = true
 	return c.finishSuite("passed")
 }

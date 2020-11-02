@@ -3,8 +3,7 @@ suiteservego:
 
 .PHONY: test
 test:
-	go test -json . | go run github.com/suiteserve/go-runner/cmd/suiteservego \
-		-reprint https://localhost:8080
+	go test -count 1 ./internal/client/clienttest
 
 .PHONY: clean
 clean:
