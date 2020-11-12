@@ -1,4 +1,4 @@
-module github.com/suiteserve/go-runner
+module github.com/suiteserve/suiteserve-go
 
 go 1.15
 

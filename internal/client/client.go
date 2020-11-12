@@ -1,21 +1,21 @@
 package client
 
 import (
-	"github.com/suiteserve/go-runner/internal/sstesting"
+	"github.com/suiteserve/suiteserve-go/internal/sstesting"
 	"net/http"
 )
 
 type Client struct {
 	http.Client
 
-	init bool
-	closed bool
+	init    bool
+	closed  bool
 	baseUrl string
-	name string
-	tags []string
-	id    string
-	cases map[string]string
-	idx int64
+	name    string
+	tags    []string
+	id      string
+	cases   map[string]string
+	idx     int64
 }
 
 func (c *Client) incIdx() int64 {
@@ -26,8 +26,8 @@ func (c *Client) incIdx() int64 {
 func Open(url, name string, tags []string) *Client {
 	return &Client{
 		baseUrl: url,
-		name: name,
-		tags: tags,
+		name:    name,
+		tags:    tags,
 		cases:   make(map[string]string),
 	}
 }

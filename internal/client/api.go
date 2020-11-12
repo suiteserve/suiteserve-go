@@ -72,6 +72,7 @@ func (c *Client) logUrl(id string) apiUrl {
 
 func (c *Client) startSuite(name string, tags []string) error {
 	return c.sendReq(http.MethodPost, suitesUrl, jsonObj{
+		"version":   0,
 		"name":      name,
 		"tags":      tags,
 		"status":    "started",
@@ -90,6 +91,7 @@ func (c *Client) startCase(name string) error {
 	var id string
 	now := timestamp()
 	if err := c.sendReq(http.MethodPost, casesUrl, jsonObj{
+		"version":   0,
 		"suiteId":   c.id,
 		"name":      name,
 		"idx":       c.incIdx(),
