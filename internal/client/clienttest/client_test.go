@@ -13,7 +13,7 @@ func TestIntegration(t *testing.T) {
 
 	testCmd := exec.Command("go", "test", "-json", "./testdata")
 	clientCmd := exec.Command("go", "run",
-		"github.com/suiteserve/go-runner/cmd/suiteservego",
+		"github.com/suiteserve/suiteserve-go/cmd/suiteservego",
 		"https://localhost:8080")
 	testOut, err := testCmd.StdoutPipe()
 	if err != nil {
