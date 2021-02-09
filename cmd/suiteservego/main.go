@@ -8,12 +8,13 @@ import (
 	"github.com/suiteserve/suiteserve-go/internal/sstesting"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
 var (
-	nameFlag = flag.String("name", "",
-		"The name of the suite")
+	projectFlag = flag.String("project", "",
+		"The project of the suite, defaults to the current directory")
 	reprintFlag = flag.Bool("reprint", false,
 		"Reprint test event output")
 	tagsFlag = flag.String("tags", "",
@@ -34,7 +35,15 @@ func main() {
 	}
 
 	err := func() (err error) {
-		c := client.Open(url, *nameFlag, strings.Split(*tagsFlag, ","))
+		project := *projectFlag
+		if project == "" {
+			wd, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+			project = filepath.Base(wd)
+		}
+		c := client.Open(url, project, strings.Split(*tagsFlag, ","))
 		defer safeClose(c, &err)
 
 		dec := json.NewDecoder(os.Stdin)

@@ -70,10 +70,10 @@ func (c *Client) logUrl(id string) apiUrl {
 	return c.buildUrl(logsUrl, id)
 }
 
-func (c *Client) startSuite(name string, tags []string) error {
+func (c *Client) startSuite(project string, tags []string) error {
 	return c.sendReq(http.MethodPost, suitesUrl, jsonObj{
 		"version":   0,
-		"name":      name,
+		"project":      project,
 		"tags":      tags,
 		"status":    "started",
 		"startedAt": timestamp(),

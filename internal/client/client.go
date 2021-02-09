@@ -23,10 +23,10 @@ func (c *Client) incIdx() int64 {
 	return c.idx
 }
 
-func Open(url, name string, tags []string) *Client {
+func Open(url, project string, tags []string) *Client {
 	return &Client{
 		baseUrl: url,
-		name:    name,
+		name:    project,
 		tags:    tags,
 		cases:   make(map[string]string),
 	}
